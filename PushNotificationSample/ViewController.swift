@@ -7,12 +7,19 @@
 //
 
 import UIKit
+import UserNotifications
 
 class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        // プッシュ通知の許諾に関するダイアログ表示。
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in
+            print("memo:push permission finishd")
+        }
+        
     }
 
     override func didReceiveMemoryWarning() {

@@ -7,17 +7,64 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseMessaging
+import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        
+        
+        
+        // リモート通知 (iOS10に対応)
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: authOptions,
+            completionHandler: {_, _ in })
+        
+        // UNUserNotificationCenterDelegateの設定
+        UNUserNotificationCenter.current().delegate = self
+        // FCMのMessagingDelegateの設定
+        Messaging.messaging().delegate = self
+        
+        // リモートプッシュの設定
+        application.registerForRemoteNotifications()
+        // Firebase初期設定
+        FirebaseApp.configure()
+        
+        // アプリ起動時にFCMのトークンを取得し、表示する
+        let token = Messaging.messaging().fcmToken
+        print("memo:FCM token: \(token ?? "")")
+        
+
         return true
     }
+    
+    //プッシュ通知を受け取った時に動作する。
+    func userNotificationCenter(_ center: UNUserNotificationCenter,willPresent notification: UNNotification,withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        
+        print("memo:プッシュ通知を受け取りました。")
+        print("memo:メッセージの内容",notification.request.content.body)
+        
+        //「メッセージ文」に記入した文字とともにアラートを表示。
+        completionHandler([.alert])
+        
+    }
+    
+    //トークンが更新されるたびに通知を受け取る?(まだ理解していない)
+    func messaging(_ messaging: Messaging, didRefreshRegistrationToken fcmToken: String) {
+        print("memo:Firebase registration token: \(fcmToken)")
+    }
+    
+    
+    
+
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
