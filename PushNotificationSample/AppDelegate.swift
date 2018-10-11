@@ -10,11 +10,13 @@ import UIKit
 import Firebase
 import FirebaseMessaging
 import UserNotifications
+import FirebaseAuth
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
+    var uid:String!
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
@@ -35,16 +37,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNo
         
         // リモートプッシュの設定
         application.registerForRemoteNotifications()
+        
         // Firebase初期設定
         FirebaseApp.configure()
-        
-        // アプリ起動時にFCMのトークンを取得し、表示する
+
+        // アプリ起動時にFCMのトークンを取得し、ユーザーデフォルトに保存。
         let token = Messaging.messaging().fcmToken
-        print("memo:FCM token: \(token ?? "")")
-        
+        UserDefaults.standard.set(token, forKey: "FCM_TOKEN")
+        print("memo:FCM token \(token ?? "")")
+
+        signInAno()
 
         return true
     }
+    
+    //匿名ログインとユーザーIDの取得
+    func signInAno(){
+        //匿名ログイン
+        Auth.auth().signInAnonymously { (user, error) in
+            if let error = error {
+                print("memo:匿名ログイン失敗",error)
+                return
+            }
+            if let user = user{
+                print("memo:ログイン成功")
+                self.uid = user.user.uid
+                UserDefaults.standard.set(self.uid, forKey: "UserID")
+                print("memo:uid",self.uid)
+            }
+        }
+    }
+    
     
     //プッシュ通知を受け取った時に動作する。
     func userNotificationCenter(_ center: UNUserNotificationCenter,willPresent notification: UNNotification,withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
@@ -57,10 +80,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNo
         
     }
     
-    //トークンが更新されるたびに通知を受け取る?(まだ理解していない)
+    //FCMトークン変更時にそれを取得し、ユーザーデフォルトに登録。
     func messaging(_ messaging: Messaging, didRefreshRegistrationToken fcmToken: String) {
+        UserDefaults.standard.set(fcmToken, forKey: "FCM_TOKEN")
         print("memo:Firebase registration token: \(fcmToken)")
     }
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
