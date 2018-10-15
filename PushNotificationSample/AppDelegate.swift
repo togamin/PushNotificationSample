@@ -43,12 +43,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNo
         // Firebase初期設定
         FirebaseApp.configure()
 
-        // アプリ起動時にFCMのトークンを取得し、ユーザーデフォルトに保存。
-        let token = Messaging.messaging().fcmToken
-        UserDefaults.standard.set(token, forKey: "FCM_TOKEN")//トークンに何も入っていない状態で動作してる可能性。
-        print("memo:FCM token \(token ?? "")")
+//        // アプリ起動時にFCMのトークンを取得し、ユーザーデフォルトに保存。
+//        let token = Messaging.messaging().fcmToken
+//        UserDefaults.standard.set(token, forKey: "FCM_TOKEN")//トークンに何も入っていない状態で動作してる可能性。
+//        print("memo:FCM token \(token ?? "")")
 
-        signInAno()
+        
 
         return true
     }
@@ -86,6 +86,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNo
     func messaging(_ messaging: Messaging, didRefreshRegistrationToken fcmToken: String) {
         UserDefaults.standard.set(fcmToken, forKey: "FCM_TOKEN")
         print("memo:Firebase registration token: \(fcmToken)")
+    }
+    
+    //リモート通知を許可した直後に動作する。
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        guard let fcmToken = Messaging.messaging().fcmToken else {
+            return
+        }
+        print("memo:didRegisterForRemoteNotification動作")
+        UserDefaults.standard.set(fcmToken, forKey: "FCM_TOKEN")
+        print("memo:FCM token \(fcmToken ?? "")")
+        signInAno()
     }
     
     

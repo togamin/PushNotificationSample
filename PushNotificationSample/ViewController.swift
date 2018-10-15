@@ -23,22 +23,15 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         defaultStore = Firestore.firestore()
         
+        print("memo:viewDidLoad")
         
     }
     
     
     
     @IBAction func addData(_ sender: UIButton) {
-        
-        
-        //FCMトークンとuidを取得するまで動作させたくない。エラーでる。値がないので。
         uid = UserDefaults.standard.object(forKey: "UserID") as! String
-        print("memo:uid",uid)
         FCM_TOKEN = UserDefaults.standard.object(forKey: "FCM_TOKEN") as! String
-        print("memo:FCM_TOKEN",FCM_TOKEN)
-        
-        
-        
         defaultStore.collection("User").document(uid).setData([
             "FCM_TOKEN": FCM_TOKEN!,
             "memo":memoTextField.text!
