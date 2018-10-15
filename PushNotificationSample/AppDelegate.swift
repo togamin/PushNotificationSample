@@ -6,11 +6,13 @@
 //  Copyright © 2018 Togami Yuki. All rights reserved.
 //
 
+//一つ問題点がある。１回目の動作で、FCMを取得する前に、usedefaultが動作してるため、addした時にエラー。2回目動作させたらうまくいく。FCMを取得してから、ユーザーデフォルトを動作させる必要がある。
+
+
 import UIKit
 import Firebase
-import FirebaseMessaging
-import UserNotifications
 import FirebaseAuth
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNotificationCenterDelegate {
@@ -24,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNo
         
         
         
-        // リモート通知 (iOS10に対応)
+        // リモート通知 (iOS10に対応)ユーザーにリモート通知を許可するかどうかの確認。
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(
             options: authOptions,
@@ -43,7 +45,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNo
 
         // アプリ起動時にFCMのトークンを取得し、ユーザーデフォルトに保存。
         let token = Messaging.messaging().fcmToken
-        UserDefaults.standard.set(token, forKey: "FCM_TOKEN")
+        UserDefaults.standard.set(token, forKey: "FCM_TOKEN")//トークンに何も入っていない状態で動作してる可能性。
         print("memo:FCM token \(token ?? "")")
 
         signInAno()
@@ -85,15 +87,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate,MessagingDelegate,UNUserNo
         UserDefaults.standard.set(fcmToken, forKey: "FCM_TOKEN")
         print("memo:Firebase registration token: \(fcmToken)")
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
 
